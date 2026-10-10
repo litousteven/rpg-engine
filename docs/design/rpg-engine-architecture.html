@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG 引擎整体架构 — 技术选型 v1.0</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --blue: #58a6ff;
+    --blue-bg: #121d2e;
+    --green: #3fb950;
+    --green-bg: #0f2318;
+    --purple: #bc8cff;
+    --purple-bg: #1e1730;
+    --orange: #d29922;
+    --orange-bg: #241d0e;
+    --red: #f85149;
+    --red-bg: #2a1214;
+    --gray-bg: #1a1f27;
+    --gray: #6e7681;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, sans-serif;
+    padding: 32px 40px 64px; line-height: 1.5;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .subtitle code { background: var(--gray-bg); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  .layer-label {
+    display: flex; align-items: center; gap: 10px;
+    margin: 26px 0 10px; font-size: 13px; font-weight: 600; color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .layer-label .line { flex: 1; height: 1px; background: var(--border); }
+  .tag { font-size: 11px; font-weight: 400; padding: 1px 8px; border-radius: 10px; letter-spacing: 0; }
+
+  .row { display: flex; gap: 14px; }
+  .box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; flex: 1;
+  }
+  .box h3 { font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .box ul { list-style: none; font-size: 12px; color: var(--muted); }
+  .box li { padding: 2.5px 0 2.5px 14px; position: relative; }
+  .box li::before { content: "·"; position: absolute; left: 2px; color: var(--gray); }
+  .box li b { color: var(--text); font-weight: 600; }
+  .box .note { font-size: 11px; color: var(--gray); margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--border); }
+
+  .c-blue  { outline: 1px solid rgba(88,166,255,.35);  outline-offset: -1px; }
+  .c-green { outline: 1px solid rgba(63,185,80,.35);  outline-offset: -1px; }
+  .c-purple{ outline: 1px solid rgba(188,140,255,.35);outline-offset: -1px; }
+  .c-orange{ outline: 1px solid rgba(210,153,34,.4);  outline-offset: -1px; }
+  .c-gray  { outline: 1px solid rgba(110,118,129,.4); outline-offset: -1px; }
+
+  .arrow-band {
+    margin: 10px 0; text-align: center; font-size: 12px; color: var(--muted);
+    position: relative; padding: 4px 0;
+  }
+  .arrow-band .glyph { color: var(--blue); font-size: 18px; letter-spacing: 6px; }
+  .arrow-band .caps { margin-top: -2px; }
+
+  /* 传输带 */
+  .transport {
+    border: 1px dashed var(--blue); border-radius: 8px; padding: 14px 16px;
+    background: rgba(88,166,255,.04);
+  }
+  .transport .title { font-size: 13px; color: var(--blue); font-weight: 600; margin-bottom: 8px; }
+  .transport .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip {
+    background: var(--blue-bg); border: 1px solid rgba(88,166,255,.3); border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; flex: 1; min-width: 220px;
+  }
+  .chip b { color: var(--blue); display: block; margin-bottom: 2px; }
+  .chip span { color: var(--muted); }
+
+  /* 内核 */
+  .kernel {
+    border: 2px solid var(--green); border-radius: 10px; padding: 16px;
+    background: rgba(63,185,80,.03);
+  }
+  .kernel .ktitle { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .kernel .ktitle h3 { font-size: 15px; color: var(--green); }
+  .kernel .ktitle span { font-size: 11px; color: var(--gray); }
+  .grid2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .kbox {
+    background: var(--green-bg); border: 1px solid rgba(63,185,80,.25); border-radius: 6px;
+    padding: 10px 12px; font-size: 12px;
+  }
+  .kbox b { color: var(--green); display: block; font-size: 12.5px; margin-bottom: 3px; }
+  .kbox span { color: var(--muted); font-size: 11.5px; display: block; }
+  .kstrip {
+    margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .kstrip .pill {
+    font-size: 11px; color: var(--green); border: 1px solid rgba(63,185,80,.3);
+    border-radius: 12px; padding: 2px 10px; background: rgba(63,185,80,.06);
+  }
+
+  /* LLM 外设 */
+  .llm {
+    border: 2px solid var(--purple); border-radius: 10px; padding: 16px;
+    background: rgba(188,140,255,.03);
+  }
+  .llm .ktitle { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .llm .ktitle h3 { font-size: 15px; color: var(--purple); }
+  .llm .ktitle span { font-size: 11px; color: var(--gray); }
+  .llm .row { margin-bottom: 0; }
+  .lbox {
+    background: var(--purple-bg); border: 1px solid rgba(188,140,255,.25); border-radius: 6px;
+    padding: 10px 12px; font-size: 11.5px; flex: 1;
+  }
+  .lbox b { color: var(--purple); display: block; font-size: 12.5px; margin-bottom: 3px; }
+  .lbox span { color: var(--muted); display: block; }
+
+  /* 存储 */
+  .storage {
+    border: 2px solid var(--orange); border-radius: 10px; padding: 16px;
+    background: rgba(210,153,34,.03);
+  }
+  .storage .ktitle { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .storage .ktitle h3 { font-size: 15px; color: var(--orange); }
+  .storage .ktitle span { font-size: 11px; color: var(--gray); }
+  .tree {
+    font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11.5px;
+    color: var(--muted); background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 16px; line-height: 1.75;
+    white-space: pre; overflow-x: auto;
+  }
+  .tree b { color: var(--orange); font-weight: 600; }
+
+  /* 存储层子结构 */
+  .subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .subcard {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .subcard h4 {
+    font-size: 12.5px; color: var(--orange); margin-bottom: 9px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .tag-o {
+    font-size: 10.5px; color: var(--gray); background: var(--gray-bg);
+    border-radius: 10px; padding: 1px 8px; font-weight: 400;
+  }
+  .hint {
+    font-size: 11px; color: var(--gray); margin-top: 9px;
+    padding-top: 7px; border-top: 1px dashed var(--border);
+  }
+  .flow3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .fbox {
+    background: var(--orange-bg); border: 1px solid rgba(210,153,34,.25);
+    border-radius: 6px; padding: 10px 12px;
+  }
+  .fbox b { color: var(--orange); display: block; font-size: 12px; margin-bottom: 4px; }
+  .fbox span { color: var(--muted); font-size: 11.5px; display: block; }
+  .strip { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .strip .pill { font-size: 11px; border-radius: 12px; padding: 2px 10px; }
+  .pill-o { color: var(--orange); border: 1px solid rgba(210,153,34,.3); background: rgba(210,153,34,.06); }
+  .whybox {
+    margin-top: 12px; font-size: 11.5px; color: var(--muted); line-height: 1.65;
+    background: var(--gray-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .whybox b { color: var(--orange); }
+  .whybox code { background: var(--bg); padding: 0 5px; border-radius: 3px; font-size: 11px; color: var(--text); }
+
+  .footer { margin-top: 40px; color: var(--gray); font-size: 11px; border-top: 1px solid var(--border); padding-top: 14px; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 26px; font-size: 12px; color: var(--muted); }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  .principle {
+    margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;
+  }
+  .principle .p {
+    background: var(--gray-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 12px; font-size: 11.5px; color: var(--muted);
+  }
+  .principle .p b { color: var(--text); }
+
+  @media (max-width: 900px) {
+    .row { flex-direction: column; }
+    .grid2 { grid-template-columns: 1fr; }
+    .subgrid, .flow3 { grid-template-columns: 1fr; }
+    body { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>RPG 引擎整体架构</h1>
+<div class="subtitle">
+  技术选型 v1.0（2026-10-09）· 配合设计稿 v0.5 ·
+  <code>headless TS 引擎进程 + 协议客户端（CLI / Web / Godot 4）+ 纯文件存储</code> ·
+  详见 <code>docs/design/rpg-engine-tech-stack.md</code>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:#58a6ff"></span>客户端 / 协议层</span>
+  <span><span class="dot" style="background:#3fb950"></span>确定性内核（无 LLM / 无网络 / 无时钟）</span>
+  <span><span class="dot" style="background:#bc8cff"></span>LLM 外设（可拔，P5）</span>
+  <span><span class="dot" style="background:#d29922"></span>存储（零外部数据库）</span>
+</div>
+
+<!-- ─────────── 客户端层 ─────────── -->
+<div class="layer-label">客户端层 <span class="tag c-blue" style="border:1px solid rgba(88,166,255,.4);border-radius:10px;">同一消息集 × 三种传输</span><div class="line"></div></div>
+<div class="row">
+  <div class="box c-blue">
+    <h3>CLI REPL <span class="tag" style="color:var(--blue);background:var(--blue-bg);">开发期 · M0</span></h3>
+    <ul>
+      <li><b>同进程 TS API</b> 直连 Gameplay API（最快路径）</li>
+      <li>vitest / 千局模拟批跑 <b>跨同一 seam</b>（行为测试即客户端行为）</li>
+    </ul>
+  </div>
+  <div class="box c-blue">
+    <h3>Web 调试台 <span class="tag" style="color:var(--blue);background:var(--blue-bg);">开发期 · M1</span></h3>
+    <ul>
+      <li>vanilla 静态页，无构建步骤</li>
+      <li><b>WebSocket + JSON-RPC</b>：菜单 / 事件流 / 账本 / 存档面板</li>
+    </ul>
+  </div>
+  <div class="box c-blue">
+    <h3>Godot 4 客户端 <span class="tag" style="color:var(--green);background:var(--green-bg);">终态 · G1–G2</span></h3>
+    <ul>
+      <li><b>渲染 + 输入，不进内核</b>（规则判定权在引擎 = P1）</li>
+      <li>sidecar：<code>OS.create_process</code> 拉起引擎进程</li>
+      <li>终态备选：内核 TS→WASM 进程内（协议不变，可无痛迁移）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─────────── 协议带 ─────────── -->
+<div class="arrow-band">
+  <div class="glyph">▲ ▲ ▲</div>
+  <div class="caps">
+    命令 <code>turn.submitIntent · query.menu · save.load · replay.seek</code>
+    &nbsp;│&nbsp;
+    事件 <code>menu.updated · turn.settled · narrative.appended · director.directive</code>
+    &nbsp;│&nbsp; 菜单三态 visible / locked+hint / hidden（§4.4）
+  </div>
+</div>
+<div class="transport">
+  <div class="title">协议 seam — Gameplay API（Zod schema 单源：TS 类型 + 运行时校验 + JSON Schema 导出；protoVer 只增不改）</div>
+  <div class="chips">
+    <div class="chip"><b>同进程 TS API</b><span>CLI / 测试 / sim 直连</span></div>
+    <div class="chip"><b>stdio + JSON-RPC</b><span>Godot sidecar / CI 脚本</span></div>
+    <div class="chip"><b>WebSocket + JSON-RPC</b><span>Web 调试台</span></div>
+  </div>
+</div>
+<div class="arrow-band">
+  <div class="glyph">▲ ▲ ▲</div>
+  <div class="caps">读：POV 投影 / 检索 / 查询 &nbsp;·&nbsp; 写：结构化 intent（唯一状态入口，P2）&nbsp;·&nbsp; 全局 seq 事件流（断线重连 / revision 门控底座）</div>
+</div>
+
+<!-- ─────────── 引擎进程 ─────────── -->
+<div class="layer-label">引擎进程（Node 22 LTS · headless · 无渲染）<div class="line"></div></div>
+
+<div class="kernel">
+  <div class="ktitle"><h3>确定性内核 src/kernel/</h3><span>TypeScript strict · 无 LLM · 无网络 · 无时钟 · 同输入同输出（P7）</span></div>
+  <div class="grid2">
+    <div class="kbox"><b>turn/ 回合管线</b><span>§12.1 八步：感知→菜单→决策→校验排序→结算→原子提交→渲染→导演</span></div>
+    <div class="kbox"><b>timeline/ 权威状态</b><span>唯一写通道 · revision++ · 事件溯源 fold(log) ≡ snapshot</span></div>
+    <div class="kbox"><b>expr/ 条件语言</b><span>手写递归下降解析 → 可序列化 AST · 触发器/门控/弧共用（§7）</span></div>
+    <div class="kbox"><b>menu/ 菜单 + 三态门控</b><span>基础层 = 行动空间边界（P3）· 条件可见性（§4.4）</span></div>
+    <div class="kbox"><b>rules/ 规则注册表</b><span>原语目录 / 定价函数 / 配方 / 遭遇表 · 规则即数据 + 版本（P4）</span></div>
+    <div class="kbox"><b>trigger/ 触发器引擎</b><span>级联深度预算 · 延迟结算队列 · 大事件传导（G19）</span></div>
+    <div class="kbox"><b>ai/ NPC 三层</b><span>L0 效用 AI + 行为树 · L1 舞台指令解释器 · L2 会话由外设供给</span></div>
+    <div class="kbox"><b>economy/ 经济</b><span>定价纯函数 · purse 拟态 · 市场账本 · 批量 delta（§8）</span></div>
+    <div class="kbox"><b>ledger/ 账本</b><span>物品（实例身份/堆叠）· 声望好感 · 区域控制 · membership（§9/§11）</span></div>
+    <div class="kbox"><b>quest/ 任务 + 故事弧</b><span>两阶段 prepare→commit · 弧池 select/advance/abort（§10）</span></div>
+    <div class="kbox"><b>entity/ 实体系统</b><span>能力槽 · essence 继承 · 血统链 · 组合校验 + 定价（§5）</span></div>
+    <div class="kbox"><b>rng/ PCG32</b><span>状态可序列化 · world/combat/loot 分流 · 掷骰入日志（§14-1）</span></div>
+  </div>
+  <div class="kstrip">
+    <span class="pill">ESLint 边界强制：kernel/ 禁 import fs / net / crypto / Math.random</span>
+    <span class="pill">效果原语 = (state, intent, rng) → events[] 纯函数</span>
+    <span class="pill">回合号 = 时钟（延迟结算到期队列是状态）</span>
+  </div>
+</div>
+
+<div style="height:14px"></div>
+
+<div class="llm">
+  <div class="ktitle"><h3>LLM 外设 src/llm/</h3><span>Provider 接口 · 可拔（P5）· M0 全 Mock / 无</span></div>
+  <div class="row">
+    <div class="lbox"><b>前台体验 Agent</b><span>正文渲染（为 L0 代笔）+ 菜单增富（参数化变体，过 schema/白名单/去重校验）</span></div>
+    <div class="lbox"><b>Actor Agent（L2）</b><span>受限 POV · 行动菜单内选 intent · 超时/失败自动落回 L0（G21：L2 必带完整 L0 profile）</span></div>
+    <div class="lbox"><b>Director Agent</b><span>舞台指令（闭集词汇）+ 任务阶段提议（图内）+ 弧操作提议（池内），全走校验带回执</span></div>
+    <div class="lbox"><b>ContentGen（离线）</b><span>资产草案 → schema + 一致性校验 → 人工审校入库</span></div>
+  </div>
+  <div class="kstrip" style="margin-top:12px;">
+    <span class="pill" style="color:var(--purple);border-color:rgba(188,140,255,.3);background:rgba(188,140,255,.06);">适配器：OpenAI 兼容 HTTP / DSH 宿主（待决 5）/ Mock 回放</span>
+    <span class="pill" style="color:var(--purple);border-color:rgba(188,140,255,.3);background:rgba(188,140,255,.06);">deadline · SLO 表 · 降级阶梯 = 配置数据（§14-4 / §12.3）</span>
+    <span class="pill" style="color:var(--purple);border-color:rgba(188,140,255,.3);background:rgba(188,140,255,.06);">注入防御：消毒管道 + 定界符 + 注入审计（§6，玩家文本永远只是数据）</span>
+  </div>
+</div>
+
+<div class="principle">
+  <div class="p"><b>P1 代码规则主导</b> — 判定权、数值权、状态变更权全在内核；LLM 是外设不是内核</div>
+  <div class="p"><b>P5 LLM 可拔</b> — 拔掉全部 LLM：状态机 NPC + 模板文案，游戏完整可玩</div>
+  <div class="p"><b>P7 确定性重放</b> — 种子 RNG + 事件日志，同输入同输出；重放等价测试每次提交跑</div>
+  <div class="p"><b>P8 Agent 不互通</b> — 一切通信经引擎中转、结构化、带 revision 门控</div>
+</div>
+
+<!-- ─────────── 存储层 ─────────── -->
+<div class="arrow-band">
+  <div class="glyph">▼ ▼ ▼</div>
+  <div class="caps">存储端口（接口定义在 kernel，实现在 storage/ · 写通道唯一：timeline 事务）</div>
+</div>
+
+<div class="storage">
+  <div class="ktitle">
+    <h3>存储层 src/storage/</h3>
+    <span>纯本地文件 · 零外部数据库 · 事件溯源 + 内容寻址 · 规则库版本化</span>
+  </div>
+
+  <!-- 两块：规则库（只读） / 存档（读写） -->
+  <div class="subgrid">
+    <div class="subcard">
+      <h4>① 规则库 content/ <span class="tag-o">只读 · 随引擎版本走 · git 审校</span></h4>
+      <div class="tree">content/
+├─ <b>primitives.json</b>    效果原语目录（收录范围 = 能力边界 §5.2）
+├─ <b>recipes.json</b>       essence → 效果原语映射（§5.3）
+├─ <b>loot.json</b>          掉落表
+├─ <b>encounters.json</b>    遭遇表
+├─ <b>arcs/</b>              故事弧池（§10）
+├─ <b>topics/</b>            话题树（§4.2）
+├─ <b>templates/</b>         模板文案库（按 intent 索引 G20）
+└─ <b>VERSION.json</b>       各域版本号 → 迁移路径（§14-2）</div>
+      <div class="hint">运行时只读不写（P4）；内容管线的 diff / 人工审校（§14-7）= PR review</div>
+    </div>
+
+    <div class="subcard">
+      <h4>② 存档 saves/&lt;slot&gt;/ <span class="tag-o">读写 · 每槽独立</span></h4>
+      <div class="tree">saves/&lt;slot&gt;/
+├─ <b>manifest.json</b>   种子 · 规则版本集 · protoVer · revision
+├─ <b>events.jsonl</b>    事件日志（掷骰 + 到期回合）· 追加 only
+├─ <b>blocks/</b>         内容寻址增量状态块（sha256 → JSON）
+├─ <b>checkpoints/</b>    周期快照 + 事件后缀
+└─ <b>archive/</b>        叙事归档 / 舞台指令账本 · 追加 only</div>
+      <div class="hint">唯一写者 = 引擎（经 timeline 事务）；无第二写入者 → 无文件并发问题（P2）</div>
+    </div>
+  </div>
+
+  <!-- 数据流：读 / 写 / 校验 -->
+  <div class="flow3">
+    <div class="fbox">
+      <b>读 · 启动</b>
+      <span>content/ → 只读 RuleRegistry<br>saves/ → fold(events + blocks) → 权威状态（内存）</span>
+    </div>
+    <div class="fbox">
+      <b>写 · 每回合</b>
+      <span>timeline 事务（原子 · revision++）<br>① events.jsonl 追加 ② blocks/ 追加 ③ 周期 checkpoints/</span>
+    </div>
+    <div class="fbox">
+      <b>校验 · 存档 / 重放</b>
+      <span>checkpoint + 事件后缀重放<br>fold(log) ≡ snapshot（启动与测试时校验，P7）</span>
+    </div>
+  </div>
+
+  <!-- 不变量 -->
+  <div class="strip">
+    <span class="pill pill-o">写通道唯一（P2）</span>
+    <span class="pill pill-o">追加 only：events / blocks / archive</span>
+    <span class="pill pill-o">内容寻址：几百回合不膨胀（§13）</span>
+    <span class="pill pill-o">规则版本 + 确定性迁移注册表（§14-2）</span>
+    <span class="pill pill-o">JSONL 文本 diff 友好</span>
+  </div>
+
+  <!-- 决策说明 -->
+  <div class="whybox">
+    <b>为什么不引 SQLite</b> —— 数据形态是「追加日志 + 重放派生态」：每回合状态在内存、账本索引是 Map，关系查询与事务能力用不上，反而引入原生依赖与打包负担。跨存档的平衡性分析走 <code>src/sim/</code> 离线批跑，不需要在线库（§11）。
+  </div>
+</div>
+
+<div class="footer">
+  依赖方向（ESLint 强制）：kernel ← storage / llm / api；api ← server / cli / sim（api 是唯一组装点）。
+  工具链：TypeScript strict · Node 22 LTS · pnpm · vitest · tsup · Node SEA 单文件分发。
+  演进：M0（内核切片，CLI）→ M1（LLM 外设 + Web 台）→ M2/M3（Director + 经济全量 + 即时制）→ M4 + Godot G2（游戏化 + 打包）。
+</div>
+
+</body>
+</html>
