@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "clientKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+    },
+    "verb": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "targets": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^item\\.inst\\.\\d{6}$"
+          },
+          {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+          },
+          {
+            "type": "string",
+            "pattern": "^tag:[a-z][a-z0-9_]*$"
+          },
+          {
+            "type": "string",
+            "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+          }
+        ]
+      }
+    },
+    "params": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "menuItemId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "basedOnRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "intentId": {
+      "type": "string",
+      "pattern": "^int\\.\\d{6}$"
+    },
+    "provenance": {
+      "type": "string",
+      "enum": [
+        "player",
+        "actor-l2",
+        "director",
+        "stage-direction",
+        "menu-enrichment",
+        "system"
+      ]
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "clientKey",
+    "actor",
+    "verb",
+    "targets",
+    "params",
+    "intentId",
+    "provenance",
+    "turn"
+  ],
+  "additionalProperties": false
+}

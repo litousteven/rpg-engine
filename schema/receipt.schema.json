@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "intentId": {
+      "type": "string",
+      "pattern": "^int\\.\\d{6}$"
+    },
+    "clientKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "reasons": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1
+          },
+          "submitted": {},
+          "expected": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "field",
+          "submitted",
+          "expected",
+          "rule"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "clientKey",
+    "retryable",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

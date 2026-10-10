@@ -1,0 +1,4 @@
+# pnpm 12 设置（https://pnpm.io/settings）——配置随 workspace 文件承载
+# 允许 esbuild 运行安装脚本（vitest/tsx 的依赖；其二进制来自 @esbuild 平台包）
+allowBuilds:
+  esbuild: true

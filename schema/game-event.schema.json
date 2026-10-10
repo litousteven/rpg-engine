@@ -1,0 +1,2233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "turn.began"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "combat",
+            "dialogue",
+            "exploration",
+            "commercial"
+          ]
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "turn.settled"
+        },
+        "intentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxCascadeDepth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "intentCount",
+        "maxCascadeDepth"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "intent.rejected"
+        },
+        "intentId": {
+          "type": "string",
+          "pattern": "^int\\.\\d{6}$"
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "clientKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "retryable": {
+              "type": "boolean"
+            },
+            "reasons": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "submitted": {},
+                  "expected": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rule": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "field",
+                  "submitted",
+                  "expected",
+                  "rule"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "clientKey",
+            "retryable",
+            "reasons"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "intentId",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "menu.presented"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "combat",
+            "dialogue",
+            "exploration",
+            "commercial"
+          ]
+        },
+        "menu": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "combat",
+                "dialogue",
+                "exploration",
+                "commercial"
+              ]
+            },
+            "items": {
+              "maxItems": 256,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "verb": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "visible",
+                      "locked",
+                      "hidden"
+                    ]
+                  },
+                  "hint": {
+                    "type": "string",
+                    "maxLength": 128
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "base",
+                      "enriched"
+                    ]
+                  },
+                  "paramsSchemaRef": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "prefill": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "context": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "id",
+                  "verb",
+                  "label",
+                  "state",
+                  "origin"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "mode",
+            "items"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "mode",
+        "menu"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "rng.rolled"
+        },
+        "stream": {
+          "type": "string",
+          "enum": [
+            "world",
+            "combat",
+            "loot"
+          ]
+        },
+        "stateBefore": {
+          "type": "string",
+          "pattern": "^[0-9a-f]+$"
+        },
+        "rolls": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "stream",
+        "stateBefore",
+        "rolls"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "item.spawned"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "template": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "qty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "rarity": {
+          "type": "string",
+          "enum": [
+            "common",
+            "uncommon",
+            "rare",
+            "epic",
+            "legendary"
+          ]
+        },
+        "essence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "uid": {
+          "type": "string",
+          "pattern": "^item\\.inst\\.\\d{6}$"
+        },
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "turn": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "roll": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lineage": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "source",
+            "turn"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "to",
+        "template",
+        "qty",
+        "rarity",
+        "essence",
+        "provenance",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "item.transferred"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^item\\.inst\\.\\d{6}$"
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            {
+              "type": "string",
+              "pattern": "^tag:[a-z][a-z0-9_]*$"
+            },
+            {
+              "type": "string",
+              "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+            }
+          ]
+        },
+        "qty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "price": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "from",
+        "to",
+        "ref",
+        "qty",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "item.destroyed"
+        },
+        "owner": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^item\\.inst\\.\\d{6}$"
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            {
+              "type": "string",
+              "pattern": "^tag:[a-z][a-z0-9_]*$"
+            },
+            {
+              "type": "string",
+              "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+            }
+          ]
+        },
+        "qty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "owner",
+        "ref",
+        "qty",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "gold.changed"
+        },
+        "actor": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "delta": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "actor",
+        "delta",
+        "balance",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "rep.changed"
+        },
+        "faction": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "delta": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "value": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "faction",
+        "delta",
+        "value",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "affinity.changed"
+        },
+        "npc": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "delta": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "value": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "npc",
+        "delta",
+        "value",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "membership.changed"
+        },
+        "npc": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "npc",
+        "from",
+        "to",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "region.control.changed"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "controller": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "contested": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "region",
+        "controller",
+        "contested",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "market.index.changed"
+        },
+        "category": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "category",
+        "region",
+        "index",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "purse.changed"
+        },
+        "npc": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "npc",
+        "balance",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "ledger.batch"
+        },
+        "actor": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "rows": {
+          "minItems": 1,
+          "maxItems": 512,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "remove",
+                  "add"
+                ]
+              },
+              "ref": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^item\\.inst\\.\\d{6}$"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^tag:[a-z][a-z0-9_]*$"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+                  }
+                ]
+              },
+              "qty": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "amount": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "kind",
+              "ref",
+              "qty",
+              "amount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "actor",
+        "rows",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "hp.changed"
+        },
+        "actor": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "delta": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "cause": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "actor",
+        "delta",
+        "cause"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "actor.defeated"
+        },
+        "actor": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "cause": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "actor",
+        "cause"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "ability.used"
+        },
+        "actor": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "abilityId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "cooldownLeft": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "actor",
+        "abilityId",
+        "cooldownLeft"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "entity.composed"
+        },
+        "uid": {
+          "type": "string",
+          "pattern": "^item\\.inst\\.\\d{6}$"
+        },
+        "recipe": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "lineage": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "buy",
+                "sell",
+                "barter",
+                "auction",
+                "gift",
+                "loot",
+                "quest-delivery",
+                "craft-consume",
+                "initial"
+              ]
+            },
+            "intentId": {
+              "type": "string",
+              "pattern": "^int\\.\\d{6}$"
+            },
+            "questId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "uid",
+        "recipe",
+        "lineage",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "ability.applied"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^(player|npc\\.[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*)$"
+        },
+        "slot": {
+          "type": "string",
+          "enum": [
+            "passive",
+            "active",
+            "cost"
+          ]
+        },
+        "primitive": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "target",
+        "slot",
+        "primitive",
+        "rank"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "trigger.fired"
+        },
+        "triggerId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "matchedExpr": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "triggerId",
+        "matchedExpr"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "cascade.budget.hit"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "abandoned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "depth",
+        "abandoned"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "deferred.scheduled"
+        },
+        "dueTurn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effect": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "dueTurn",
+        "effect",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "deferred.executed"
+        },
+        "dueTurn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "executedAtTurn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effect": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "dueTurn",
+        "executedAtTurn",
+        "effect"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "quest.stage.prepared"
+        },
+        "questId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "stage": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "questId",
+        "stage"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "quest.stage.committed"
+        },
+        "questId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "stage": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "questId",
+        "stage"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "arc.selected"
+        },
+        "arcId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^item\\.inst\\.\\d{6}$"
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+              },
+              {
+                "type": "string",
+                "pattern": "^tag:[a-z][a-z0-9_]*$"
+              },
+              {
+                "type": "string",
+                "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "arcId",
+        "slots"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "arc.stage.advanced"
+        },
+        "arcId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "stage": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "arcId",
+        "stage"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "arc.branch.taken"
+        },
+        "arcId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "arcId",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "arc.aborted"
+        },
+        "arcId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "arcId"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "directive.issued"
+        },
+        "directiveId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verb": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ttlTurns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "strength": {
+          "type": "string",
+          "enum": [
+            "hard",
+            "bias"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "player",
+            "actor-l2",
+            "director",
+            "stage-direction",
+            "menu-enrichment",
+            "system"
+          ]
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "directiveId",
+        "verb",
+        "target",
+        "ttlTurns",
+        "strength",
+        "reason",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "directive.expired"
+        },
+        "directiveId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "directiveId"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "t": {
+          "type": "string",
+          "const": "naming.sanitized"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^item\\.inst\\.\\d{6}$"
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            {
+              "type": "string",
+              "pattern": "^tag:[a-z][a-z0-9_]*$"
+            },
+            {
+              "type": "string",
+              "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+            }
+          ]
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "seq",
+        "turn",
+        "revision",
+        "t",
+        "target",
+        "maxLength",
+        "truncated"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

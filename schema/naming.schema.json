@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "char_name",
+        "item_name",
+        "flavor",
+        "note"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[\\p{L}\\p{N} _'·-]+$"
+    },
+    "targetRef": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^item\\.inst\\.\\d{6}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        {
+          "type": "string",
+          "pattern": "^tag:[a-z][a-z0-9_]*$"
+        },
+        {
+          "type": "string",
+          "pattern": "^loreRef:[a-z][a-z0-9_.]+$"
+        }
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "text"
+  ],
+  "additionalProperties": false
+}

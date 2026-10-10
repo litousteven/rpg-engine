@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "combat",
+        "dialogue",
+        "exploration",
+        "commercial"
+      ]
+    },
+    "items": {
+      "maxItems": 256,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "verb": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "visible",
+              "locked",
+              "hidden"
+            ]
+          },
+          "hint": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "base",
+              "enriched"
+            ]
+          },
+          "paramsSchemaRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prefill": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "context": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "id",
+          "verb",
+          "label",
+          "state",
+          "origin"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "mode",
+    "items"
+  ],
+  "additionalProperties": false
+}
