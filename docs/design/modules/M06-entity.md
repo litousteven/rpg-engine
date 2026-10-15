@@ -64,9 +64,9 @@ describeProjection(entity, lore?: LoreEntry, flavor?: string): Description
 5. **堆叠 vs 实例**：普通掉落 ×20 → 一条堆叠（qty 20）；named 再掉 → 新实例。
 6. **B1 收口**：`tests/b1-closeout.test.ts` 主体（见 M08 §5）。
 
-## 6. 开放问题
+## 6. 决策状态（2026-10-13 用户裁决）
 
-| # | 问题 | 建议 |
+| # | 问题 | 状态 |
 |---|---|---|
-| O1 | spawn 与入袋一个事件还是两个（spawned + transferred） | **一个**：`item.spawned.to` 即诞生入账（contract 已如此）；boss→玩家是 provenance.source 事实，不是账面易主。`item.transferred` 留给已有物易主（买卖/交付/赠予）——谓词 `item_delivered` 查 transferred，语义不混 |
-| O2 | 描述投影放 M06 还是独立模块 | M06 内 `describeProjection`（纯函数）；Narrator/模板文案（M1/M18）是它的消费者，B1 只落结构 + provenance 行 |
+| O1 | spawn 与入袋一个事件还是两个（spawned + transferred） | **一个**：`item.spawned.to` 即诞生入账；boss→玩家是 provenance.source 事实，不是账面易主。`item.transferred` 留给已有物易主（买卖/交付/赠予），谓词语义不混 |
+| O2 | 描述投影放 M06 还是独立模块 | **M06 内 `describeProjection`**（纯函数）；Narrator/模板文案（M1/M18）是消费者，B1 只落结构 + provenance 行 |

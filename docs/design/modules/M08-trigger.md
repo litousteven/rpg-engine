@@ -17,35 +17,47 @@
 | T-7 | 评估纯函数 | when 对当前权威状态求值（M03 evaluate）；谓词上下文只读（S4：队列按 dueTurn 有序，重放同序） |
 | T-8 | 冷却 | 触发器可配 `cooldownTurns`：N 回合内不重触发（记入权威状态——重放确定） |
 | T-9 | 递归防环 | 同一事务内同一 (triggerId, 起因事件签名) 不二次触发（dsh-tavern 防串场模式的移植） |
+| T-10 | 传导链预算（裁决 O4 新增） | `deferred.scheduled` 携带 `origin`（传导链起点事件引用）；**链上累计深度跨回合 ≤ 32**（规则库可配），超限即 `cascade.budget.hit` 并**终止整条传导链**——跨回合循环（A defer 触发 B、B defer 触发 A）靠链预算闸住，而非砍断传导接力 |
 
 ## 2. 公开接口
 
 ```ts
+// 只读事件流视图（裁决 O2）：已提交事件的投影——级联中途评估只看已提交（timeline.events 快照），
+// 在途事件天然不在其中；B1 线性扫描，B2 由 M05 审计层建 source.kind 索引
+interface EventLogView {
+  /** 按 source.kind 过滤的事件（item_delivered 等 §7 事件谓词的查询面） */
+  byKind(kind: SourceKind): readonly GameEvent[];
+  all(): readonly GameEvent[];
+}
+
 // 主入口：事件驱动的级联循环（§12.1 步骤 5 的引擎本体）
 processTriggers(state, ruleset, incoming: GameEvent[]): TriggerResult
 // 循环：incoming → 命中订阅的触发器 → evaluate(when, 谓词上下文) → 冷却检查
 //       → 效果原语执行（产出新事件，按级分事务）→ 新事件入队，直到无新事件/超深度/超回合预算
 interface TriggerResult {
   txs: GameEvent[][];              // 每级一个事务数组（M13 逐级 timeline.apply）
-  budgetHit?: GameEvent;           // cascade.budget.hit（T-4）
+  budgetHit?: GameEvent;           // cascade.budget.hit（T-4 深度 / T-5 回合 / T-10 传导链）
   fired: { triggerId: string; atDepth: number }[];  // 审计摘要
 }
 
-// 谓词上下文（GameState → M03）：§7 谓词清单的账本索引实现
-predicateContext(state, ruleset): PredicateContext
+// 谓词上下文（裁决 O2）：闭包持有 GameState + EventLogView（§7 硬规则 3：
+// 查物品走账本索引，查事件走事件日志，不扫描叙事归档）
+predicateContext(state, logView: EventLogView, ruleset): PredicateContext
 // player_level/faction_rep/npc_affinity/player_owns(tag|template|uid|loreRef)/
-// lineage_of/item_delivered(事件日志查询——B1 需要事件流引用，见开放问题 O2)/
-// market_index/region_controlled_by/region_contested/quest_stage/arc_stage/scene_tag
+// lineage_of/item_delivered(经 logView)/market_index/region_controlled_by/
+// region_contested/quest_stage/arc_stage/scene_tag
 
-// 延迟结算（G19）
-dueDeferreds(state, turn): DeferredEffect[]          // 步骤 0 查询（按 dueTurn 有序）
-buildDeferredScheduled(effect, dueTurn, source): GameEvent
+// 延迟结算（G19；裁决 O4：到期执行的事件**统一入 processTriggers**——与立即级联同一路径，
+// 预算/冷却/防环/审计共用；origin 随链传播（T-10））
+executeDeferreds(state, ruleset, due: DelayedEffect[]): TriggerResult   // 步骤 0 入口（M13 接线，B3）
+dueDeferreds(state, turn): DelayedEffect[]          // 步骤 0 查询（按 dueTurn 有序）
+buildDeferredScheduled(effect, dueTurn, source, origin?): GameEvent
 buildDeferredExecuted(due, executedAtTurn): GameEvent
 ```
 
 ## 3. 依赖端口
 
-M03（parse/evaluate）、M05（账本查询）、M07（triggerDefs/原语目录）、M02（原语执行注入 Rng）。
+M03（parse/evaluate——谓词上下文由 M08 闭包构造）、M05（账本查询 + B2 的 EventLogView 索引）、M07（triggerDefs/原语目录）、M02（原语执行注入 Rng）、M04（`timeline.events` 作为 EventLogView 的数据源——只读快照）。
 
 ## 4. 事件产出
 
@@ -55,10 +67,12 @@ M03（parse/evaluate）、M05（账本查询）、M07（triggerDefs/原语目录
 
 1. **C1 T4 联测**：`item.transferred{kind: quest-delivery}` 事件 → 订阅触发器评估 `item_delivered(npc: elder_yun, tag: bone_of_bone_maw)` → 效果原语产出任务事件。
 2. **级联**：A 触发 B、B 触发 C——事务逐级、深度推进正确；8 层上限超限 → budgetHit + 中止。
-3. **冷却**：同触发器 N 回合内二连事件只触发一次。
-4. **重放确定**：级联产出的全事件流，同输入双跑逐字节相等（P7 引擎级）。
-5. **谓词上下文**：C5 faction_rep（账本直查）、C2 loreRef 反向激活（player_owns）。
-6. **B1 收口**（`tests/b1-closeout.test.ts`）：
+3. **传导链预算（T-10）**：deferred 执行再 defer 的接力链累计深度 ≤ 32；构造 A↔B 跨回合循环 → 链预算超限 → budgetHit + 整链终止，重放同结果。
+4. **eventLogView 语义（裁决 O2）**：级联中途评估只看**已提交**事件——本事务在途事件不可见；重放重建的视图求值一致。
+5. **冷却**：同触发器 N 回合内二连事件只触发一次。
+6. **重放确定**：级联产出的全事件流，同输入双跑逐字节相等（P7 引擎级）。
+7. **谓词上下文**：C5 faction_rep（账本直查）、C2 loreRef 反向激活（player_owns）、C1 T4 item_delivered（logView 查询）。
+8. **B1 收口**（`tests/b1-closeout.test.ts`）：
    ```text
    M07 掉落表（骨头 named）→ M02 掷骰（chance 判定 + roll 事件）
    → M06 buildItemSpawned（uid/essence/lineage/provenance 焊入）
@@ -67,11 +81,11 @@ M03（parse/evaluate）、M05（账本查询）、M07（triggerDefs/原语目录
    → verifyFold + 重放后求值仍真
    ```
 
-## 6. 开放问题（实现前裁决）
+## 6. 决策状态（2026-10-13 用户裁决）
 
-| # | 问题 | 建议 |
+| # | 问题 | 状态 |
 |---|---|---|
-| O1 | 评估时机：事件后即时级联 vs 回合末批处理 | **即时级联**（结算步内逐级事务）——§12.1 步骤 5 的字面语义；回合末批处理会改变事件序（重放语义复杂化） |
-| O2 | `item_delivered` 是事件谓词——需要事件日志查询，但 M08 的 processTriggers 只拿 state | 谓词上下文签名升级为 `(state, eventLogView)`：注入**只读事件流视图**（按 source.kind 索引的投影，M05 审计层建的索引）——B1 先做线性扫描版（存档小），索引优化 B2 |
-| O3 | budgetHit 丢弃的效果要不要记明细 | **只记计数**（`cascade.budget.hit.abandoned`）——明细太吵；真需要审计时事件日志已含未触发侧的 fired 缺席 |
-| O4 | 延迟队列执行是否也要过级联（deferred 触发新级联） | **要**：步骤 0 执行的 deferred 效果事件同样入 processTriggers——统一路径，G19 传导链才能滚雪球（改朝换代全流程依赖此语义） |
+| O1 | 评估时机：即时级联 vs 回合末批处理 | **即时级联**（§12.1 步骤 5 字面语义） |
+| O2 | 事件谓词数据源 | **谓词上下文 = (state, EventLogView)**（§7 硬规则 3 字面落地）；只看已提交事件；B1 线性扫描、B2 索引（M05 审计层） |
+| O3 | budgetHit 丢弃效果明细 | **只记计数**（`cascade.budget.hit.abandoned`） |
+| O4 | deferred 执行是否过级联 | **统一入 processTriggers**（与立即级联同路径）+ **新增 T-10 传导链预算**（origin 随链传播、跨回合累计 ≤ 32、超限终止整链） |

@@ -43,6 +43,8 @@ checkTypes(ast: Ast, registry: PredicateRegistry): void   // 内容校验用（�
 
 `PredicateContext = (name: string, args: Args) => boolean | number | string`——谓词注册表由宿主（M08/M09）注入，M03 只管语法与求值框架。
 
+**宿主闭包形态（2026-10-13 裁决 B1-O2）**：谓词实现闭包持有 `(GameState, EventLogView)`——**状态谓词查账本索引，事件谓词查已提交事件日志**（§7 硬规则 3：查物品走账本索引，查事件走事件日志，不扫描叙事归档）。M03 自身签名不变（状态与日志视图都是宿主闭包），EventLogView 定义见 `M08-trigger.md` §2。
+
 ## 4. 依赖端口
 
 contract（无专用 schema；AST 是引擎内 JSON）。

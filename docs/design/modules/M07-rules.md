@@ -53,10 +53,10 @@ contract（schema 复用：TemplateId/Rarity/Slug）；M02（原语执行时注�
 3. **迁移**：v1→v2 单跳、v1→v3 链式、断链拒载。
 4. **B1 收口联测**：`loot.roll(rng)` 骨头 chance 1.0 named=true（C1 T0 数据源）。
 
-## 6. 开放问题
+## 6. 决策状态（2026-10-13 用户裁决）
 
-| # | 问题 | 建议 |
+| # | 问题 | 状态 |
 |---|---|---|
 | O1 | 定价函数 B1 就落吗 | **不**——Case 1 T0 不需要定价（T2 属 B2）；B1 落 `pricing` 域 schema 占位 + 注册表骨架，实现随 M11 |
-| O2 | content/ 样例文件与 schema 同批交付 | **同批**——手写 M0 内容（骨头/骨刃/护符三件套），测试夹具即样例，git diff 可审 |
-| O3 | chance 用定点分数（num/den）还是整数百分比 | 定点分数 `{num, den}`（全链禁浮点推论；1.0 = {1,1}，0.25 = {1,4}） |
+| O2 | content/ 样例文件与 schema 同批交付 | **同批交付**（裁决 A）：B1 落 content/ 三件套——骨头掉落表（`boss.bone_maw → item.bone.large`，named+essence）、骨刃配方（`craft.weapon.bone_blade`，essence→原语映射）、测试原语目录 + `VERSION.json`。测试跑真实文件（fs 缝隙从 B1 被测过）；迁移注册表趁内容小早期锻炼 |
+| O3 | chance 用定点分数还是整数百分比 | **定点分数 `{num, den}`**（全链禁浮点推论；1.0 = {1,1}，0.25 = {1,4}） |

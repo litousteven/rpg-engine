@@ -40,7 +40,7 @@ ledgerAppliers(): 账本域事件注册集
 
 ## 3. 依赖端口
 
-contract（事件/状态 schema）、timeline（ApplierRegistry）。不依赖 M03（账本无表达式）；不依赖 fs（M07 内容加载属 M07/storage）。
+contract（事件/状态 schema）、timeline（ApplierRegistry）。不依赖 M03（账本无表达式）；不依赖 fs（M07 内容加载属 M07/storage）。**B2 增项（裁决 O2）**：审计层建 `EventLogView` 索引（`source.kind → events[]` 投影）——M08 谓词上下文的事件查询面。
 
 ## 4. 事件产出
 
@@ -66,10 +66,10 @@ contract（事件/状态 schema）、timeline（ApplierRegistry）。不依赖 M
 5. **L2 成对一致性**：所有 builder 正反例参数化过 applier。
 6. **B1 收口集成**：`tests/b1-closeout.test.ts`——C1 T0 掉落入袋（见 M06 §5）。
 
-## 6. 开放问题（实现前裁决）
+## 6. 决策状态（2026-10-13 用户裁决）
 
-| # | 问题 | 建议 |
+| # | 问题 | 状态 |
 |---|---|---|
 | O1 | builder 失败返回 Result 还是抛错 | **Result**：回执即 R1 形态，M12/协议零转换；applier 侧照抛（fold 兜底） |
-| O2 | 堆叠合并键 | `template+rarity`——具名物是实例天然不参与堆叠（C1 骨头不与普通骨头合并无需 essence 参与） |
-| O3 | 好感重算位置 | `buildMembershipChange` **内联**（同事务出 membership.changed + affinity.changed），不依赖 M08 级联时序 |
+| O2 | 堆叠合并键 | **template+rarity**：具名物是实例天然不参与堆叠（C1 骨头无需 essence 参与合并键） |
+| O3 | 好感重算位置 | **buildMembershipChange 内联**（同事务出 membership.changed + affinity.changed），不依赖 M08 级联时序 |
