@@ -1,0 +1,16 @@
+{
+  "domain": "recipes",
+  "recipes": [
+    {
+      "id": "craft.weapon.bone_blade",
+      "station": "smithy",
+      "materials": [
+        { "ref": "item.bone.large", "qty": 1 }
+      ],
+      "essenceMapping": {
+        "poison_affinity": { "primitive": "poison_on_hit" },
+        "colossal": { "primitive": "heavy" }
+      }
+    }
+  ]
+}

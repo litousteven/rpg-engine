@@ -28,6 +28,7 @@ import {
   SlugSchema,
   TemplateIdSchema,
 } from './ids.js';
+import { AbilitySchema } from './state.js';
 import { MenuSchema } from './menu.js';
 import { ReceiptSchema } from './receipt.js';
 
@@ -81,6 +82,10 @@ export const GameEventSchema = z.discriminatedUnion('t', [
     essence: z.array(SlugSchema),
     /** 唯一实例才有 uid（G1：named → 升级实例不堆叠） */
     uid: InstanceUidSchema.optional(),
+    /** 实例携带的世界观引用（C2 护符）与能力槽（G8）——实例字段随事件焊死 */
+    loreRef: TemplateIdSchema.optional(),
+    abilities: z.array(AbilitySchema).optional(),
+    basePrice: z.number().int().min(0).optional(),
     provenance: z.strictObject({
       source: z.string().min(1),
       turn: z.number().int().min(0),

@@ -1,0 +1,15 @@
+{
+  "domain": "triggers",
+  "triggers": [
+    {
+      "id": "trigger.elder_yun_bone_delivery",
+      "on": ["item.transferred"],
+      "when": "item_delivered(npc: \"npc.elder_yun\", tag: \"bone_of_bone_maw\")",
+      "effect": {
+        "primitive": "quest_effect",
+        "args": { "questId": "quest.elder_yun_favor", "stage": "bone_received" }
+      },
+      "cooldownTurns": 1
+    }
+  ]
+}

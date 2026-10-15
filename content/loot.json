@@ -1,0 +1,31 @@
+{
+  "domain": "loot",
+  "tables": [
+    {
+      "encounterId": "boss.bone_maw",
+      "loot": [
+        {
+          "template": "item.bone.large",
+          "chance": { "num": 1, "den": 1 },
+          "named": true,
+          "essence": ["poison_affinity", "colossal"],
+          "rarity": "rare",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "encounterId": "location.sunken_temple",
+      "loot": [
+        {
+          "template": "relic.sun_amulet",
+          "chance": { "num": 1, "den": 1 },
+          "named": true,
+          "essence": ["light", "ancient"],
+          "rarity": "epic",
+          "qty": 1
+        }
+      ]
+    }
+  ]
+}

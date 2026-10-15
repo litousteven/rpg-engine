@@ -414,6 +414,51 @@
           "type": "string",
           "pattern": "^item\\.inst\\.\\d{6}$"
         },
+        "loreRef": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string",
+                "enum": [
+                  "passive",
+                  "active",
+                  "cost"
+                ]
+              },
+              "primitive": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "rank": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "cooldown": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "slot",
+              "primitive",
+              "rank"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "basePrice": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "provenance": {
           "type": "object",
           "properties": {

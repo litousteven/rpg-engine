@@ -41,7 +41,7 @@
 | 批次 | 模块 | 收口验收（全部为可执行断言） | 状态 |
 |---|---|---|---|
 | B0 | M01 M02 M03 M04 | ① 同种子双跑事件流逐字节相等 ② fold≡snapshot（timeline.verifyFold）③ **B0 全链路：M02 掷骰 → rng.rolled 事件 → timeline 提交 → M03 表达式在重放状态上求值一致** ④ Case 夹具回归（M01 51 项） | **✅ 全部通过（src/kernel/__tests__/b0-closeout.test.ts）** |
-| B1 | M05 M06 M07 M08 | ① **Case 1 T0 全链路**：掉落表掷骰(M02) → item.spawned(M06) → 账本入袋(M05) → 触发器条件(M03/M08) ② 两级好感/批量 delta/实例身份不变量断言 ③ 规则加载校验（M07） | 设计稿已裁决（2026-10-13：谓词上下文=(state,EventLogView)、deferred 统一入级联+传导链预算 T-10、content 样例同批交付），**开工** |
+| B1 | M05 M06 M07 M08 | ① **Case 1 T0 全链路**：掉落表掷骰(M02) → item.spawned(M06) → 账本入袋(M05) → 触发器条件(M03/M08) ② 两级好感/批量 delta/实例身份不变量断言 ③ 规则加载校验（M07） | **✅ 全部通过（tests/b1-closeout.test.ts；171/171 绿）** |
 | B2 | M09 M10 M11 M12 | ① 一回合完整机制：菜单三态(M09) → L0 决策(M10) → 结算(M12) ② Case 1 T2/T3：定价纯函数、essence 继承 ③ 批量交易原子性 ④ 非法 intent 带差异回执 | ⬜ |
 | B3 | M13 M15 M16 M17 M19 | **M0 全验收**（设计稿 §15）：两阵营互殴 10 回合、可存档/重放/分支、门控三态、批量交易、`pnpm sim --runs 1000` 出数值分布 | ⬜ |
 | B4 | M18 M20 | ① 拔 LLM 完整可玩（MockProvider 注错全链路，C7）② 增富选项 100% 合法 ③ protoVer 冻结为 1 | ⬜ |

@@ -31,4 +31,16 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // M07/M06/M08 验收：规则加载、合成与触发器联测跑真实 content/ 文件——
+    // fs 读取是 storage 职责（R-6），测试文件是 storage 侧缝隙的替身，获准触碰 fs。
+    files: [
+      'src/kernel/rules/__tests__/*.ts',
+      'src/kernel/entity/__tests__/*.ts',
+      'src/kernel/trigger/__tests__/*.ts',
+    ],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
 );

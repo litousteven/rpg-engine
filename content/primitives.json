@@ -1,0 +1,41 @@
+{
+  "domain": "primitives",
+  "primitives": [
+    {
+      "id": "poison_on_hit",
+      "params": {},
+      "cost": 30,
+      "desc": "C1 T3：武器淬毒——攻击附带毒伤（passive，essence poison_affinity 映射）"
+    },
+    {
+      "id": "heavy",
+      "params": {},
+      "cost": 20,
+      "desc": "C1 T3：重武器——伤害上浮、攻速下调（passive，essence colossal 映射）"
+    },
+    {
+      "id": "light_resist",
+      "params": {},
+      "cost": 40,
+      "desc": "C2：光抗（passive，rank 2，遗迹物品池）"
+    },
+    {
+      "id": "holy_burst",
+      "params": {},
+      "cost": 50,
+      "desc": "C2：圣光爆发（active，rank 1，冷却 3）"
+    },
+    {
+      "id": "dark_penalty",
+      "params": {},
+      "cost": 15,
+      "desc": "C2：暗蚀代价（cost，rank 1，诅咒式权衡）"
+    },
+    {
+      "id": "quest_effect",
+      "params": { "questId": "slug", "stage": "slug" },
+      "cost": 0,
+      "desc": "C1 T4 联测：任务阶段提议（quest.stage.prepared）"
+    }
+  ]
+}
