@@ -12,7 +12,7 @@
 |---|---|---|
 | L1 | 唯一写路径 | 状态只经 timeline.fold 变更。M05 提供**builders**（生成事件）与**appliers**（fold 写入+校验）两类构件 |
 | L2 | 成对一致 | builder 产出的事件必须被对应 applier 接受——参数化测试锁死（防「生成器造出账本不认的账」） |
-| L3 | 双身份 | 堆叠：同 `template+rarity` 合并 qty，无 uid；实例：uid 唯一、qty 恒 1、永不合并。qty ≥ 0，负库存被 applier 拒 |
+| L3 | 双身份 | 堆叠：**同 template 合并**（F1：rarity 为模板属性，2026-10-15 修订）qty，无 uid；实例：uid 唯一、qty 恒 1、永不合并。qty ≥ 0，负库存被 applier 拒；applier 断言同模板堆叠 ≤ 1 条 |
 | L4 | 声望/好感域 | rep/affinity ∈ [-100,100]，越界 delta 被 applier 拒（S3/G13） |
 | L5 | 交易原子性 | 交易型转移必须双向同事务（§4.5）——复用 M04 原子性：任一侧 builder 预检失败 → 整笔回执，无事件产生 |
 | L6 | 批量形态 | 批量 = 多事件单事务：N 个 `item.transferred` + 1 个汇总 `gold.changed`（C4：200 件 = 4 transfer + 1 gold）。`ledger.batch` 事件仅当行数 ≥ 50 时附加为审计摘要（applier no-op） |
@@ -66,10 +66,12 @@ contract（事件/状态 schema）、timeline（ApplierRegistry）。不依赖 M
 5. **L2 成对一致性**：所有 builder 正反例参数化过 applier。
 6. **B1 收口集成**：`tests/b1-closeout.test.ts`——C1 T0 掉落入袋（见 M06 §5）。
 
-## 6. 决策状态（2026-10-13 用户裁决）
+## 6. 决策状态
+
+**2026-10-13 B1 裁决**（O1 builder Result 形态、O3 membership 内联重算）如前，不变。
+
+**2026-10-15 B2 修订（F1 稀有度模板化，推翻 B1 O2「堆叠键 = template+rarity」）**：
 
 | # | 问题 | 状态 |
 |---|---|---|
-| O1 | builder 失败返回 Result 还是抛错 | **Result**：回执即 R1 形态，M12/协议零转换；applier 侧照抛（fold 兜底） |
-| O2 | 堆叠合并键 | **template+rarity**：具名物是实例天然不参与堆叠（C1 骨头无需 essence 参与合并键） |
-| O3 | 好感重算位置 | **buildMembershipChange 内联**（同事务出 membership.changed + affinity.changed），不依赖 M08 级联时序 |
+| O2′ | 堆叠合并键 | **F1：rarity 是模板属性**（templates content 域声明品阶）——堆叠键塌缩为 **template 单键**；「同模板多稀有度堆叠」结构性不存在。EntityRef 四形态不动（模板引用对堆叠唯一，引用歧义消失）。动机：80 common + 10 uncommon 同模板在 template+rarity 键下导致引用歧义与 applier first-match 潜伏 bug（B1 测试未覆盖）；C1–C7 无一 case 需要「同模板多稀有度」。**applier 增补断言**：同模板堆叠 > 1 条 → 拒（fold 侧硬校验）。rarity 留在 StackEntry/InstanceEntry（实例可用 upgraded 品阶，与模板品阶不必相同）；将来出现「品质前缀」内容需求再评估 EntityRef 第 5 形态（只增不改，旧档走 R-4 迁移赋品阶） |

@@ -10,7 +10,7 @@
 |---|---|---|
 | E-1 | 定价纯函数 | `price = f(base, rarity, essence, 市场因子, 画像)`——输入全结构化，同输入同输出（P7）；版本化随规则库（pricing 域，B1 已占位 schema） |
 | E-2 | 全链定点 | 系数/溢价/指数一律定点 ×10⁴（C1 T2 示例 376 系整数域；rarity 分档 白1×/绿2×/蓝4× 即 10000/20000/40000） |
-| E-3 | pending 惰性 | 供需增量随微事务入 pendingSupply/pendingDemand 累积器；达量阈值或回合边界才 flush 为 index（S6；M15 §7）——flush 产出 `market.index.changed` 事件（仅 flush 点发，C4） |
+| E-3 | pending 显式入账 | 供需增量随转移事务同事务产出 **`market.pending.changed`** 事件（{category, region, supply, demand}；applier 累积进 pendingSupply/pendingDemand）——E1 对 pending 显式成立，审计可直读哪笔交易动了哪个市场。达量阈值或回合边界才 flush 为 index（S6；M15 §7）——flush 产出 `market.index.changed`（仅 flush 点发，C4） |
 | E-4 | 指数下界 | index ≥ 下限（默认 2000 = 0.2×，规则库可配）——倾销压价边际递减但不归零（防通胀阀门的对偶面） |
 | E-5 | purse 拟态 | purse 有上限、按周期恢复（回合边界 +refreshRate，规则库数据）；收购扣减，不足 → M09 条目 locked（§8.2 的门控表达） |
 | E-6 | 谈判区间引擎定 | `[price×0.8, price×1.2]`（画像可调幅）；超区间提交被 M12 校验拒并回执 `economy.negotiation_band`（C1 T2/C3 锚点；报价上限引擎计算，L2 只能在区间内决策） |
@@ -35,11 +35,9 @@ appraise(state, ruleset, cmd: { item: EntityRef, merchant?: ActorId }): PriceBre
 negotiationBand(state, ruleset, cmd): { low: number, high: number }
 
 // ── 市场账本（E-3/E-4） ────────────────────────────────────────
-// 微事务路径：pending 累积（builders 已在 M05 落 applier——本模块给 builder）
+// 微事务路径：pending 增量显式入账（O1 裁决——E1 显式成立）
 buildPendingMarketDelta(state, cmd: { category, region, supply?, demand? }): BuildEventDraft[]
-// 实现形态：pending 累积器是 GameState.world.market 条目字段（S6 已落），
-// 本模块产出 pending.changed 类微事务事件？——否：见裁决 O1（pending 随
-// 转移事务同事务写入，不开新事件类型）
+// 产出 market.pending.changed 事件草稿（随转移事务同事务提交）
 
 // flush 判定与执行（管线步骤 0 / 阈值即时触发；M13 B3 接线）
 shouldFlush(entry: MarketEntry, ruleset): boolean
@@ -61,6 +59,7 @@ M05（purse/gold/inventory builder + pending 字段 applier）、M07（pricing �
 
 | 事件 | builder | 说明 |
 |---|---|---|
+| `market.pending.changed` | buildPendingMarketDelta | **B2 新增事件类型**（35 类 → 36）；随转移事务同事务提交，applier 累积 pending 字段 |
 | `market.index.changed` | buildFlush | 仅 flush 点（E-3；applier B1 已落账） |
 | `purse.changed` | buildPurseRefresh（+M05 已有收购扣减） | 回合边界恢复（E-5） |
 
@@ -74,11 +73,13 @@ M05（purse/gold/inventory builder + pending 字段 applier）、M07（pricing �
 6. **purse**（C3）：铁匠 800 收购 300 → 500；不足 → 卖出菜单 locked + hint（M09 联测）；回合边界恢复。
 7. **B2 收口**：C4 批量 580 金 ← 定价驱动（unitPrices 来自 appraise 而非测试手写）。
 
-## 6. 开放问题（实现前裁决）
+## 6. 决策状态（2026-10-15 用户裁决）
 
-| # | 问题 | 推荐 |
+| # | 问题 | 状态 |
 |---|---|---|
-| O1 | pending 写入是否开新事件类型（pending.changed） | **不开**——pending 累积随转移事务同事务直接改状态字段（S6 语义即如此）；日志上表现为 gold/transfer 事件 + checkpoint 内 pending 值——**重放由 fold 还原 pending，无需独立事件**。省 1 类事件、34 判别分支不动 |
-| O2 | 买卖系数放哪 | **定价函数注册表（代码）+ pricing 域（数值）**——公式代码化（P4 同原语），系数/阈值/漂移参数数据化（平衡调参走 content diff，可审计） |
-| O3 | flush 阈值即时判定位置 | **M12 结算尾部扫 pending**（结算完必有代码路径）+ M13 步骤 0 兜底（回合边界）——两处同调用 shouldFlush，逻辑单源 |
-| O4 | C1 T2 的 essence 溢价公式 | **加法合并**：`1.0 + Σ 单标签溢价`（120×1.8×1.7：0.7 = poison 0.4 + colossal 0.3 定点 7000）；乘法连乘在整数域放大舍入误差，且案例数值是加法口径 |
+| O1 | pending 写入是否开新事件类型 | **开 `market.pending.changed`**（推演修订初判）：转移事件 payload 无 category/region，「fold 还原 pending」推导不成立；开事件是 E1 唯一显式成立的路，审计直读。契约 34→35 类，草案期一次付清 |
+| O2 | 买卖系数放哪 | **公式代码 + 数值 content**（pricing 域落地，B1 M07-O1 承诺兑现）——平衡调参走 content diff 可审 |
+| O3 | flush 阈值即时判定位置 | **M12 结算尾部扫 pending**（结算必经路径，B2 可独立验收）+ M13 步骤 0 兜底——shouldFlush 单源两处调用 |
+| O4 | essence 溢价公式 | **加法合并**（因子内 Σ、因子间 Π）：essenceFactor = 1.0 + Σ标签溢价——C1 T2 文档口径（+0.7 = 0.4+0.3），夹具锚定成立；多标签堆叠由原语目录收录范围控制（§5.2 旋钮 1） |
+
+**F1 联动（M09-O2 裁决的稀有度模板化）**：rarity 成为模板属性（templates content 域声明）——pricing 域的 rarity 系数表按模板品阶直读；`loot.json` 条目的 `rarity` 字段降级为可选冗余（M21 校验对齐「条目 rarity ≡ 模板品阶」告警，不参与堆叠语义）。
